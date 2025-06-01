@@ -1,0 +1,47 @@
+<!-- templates/dashboard/overview.html -->
+{% extends "trading/base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h2 class="text-2xl font-semibold mb-4">Performance Dashboard</h2>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+  <div class="bg-white p-4 rounded-xl shadow">
+    <p class="text-sm text-gray-500">Total P&L</p>
+    <p class="text-2xl font-bold text-green-600">${{ total_pnl }}</p>
+  </div>
+  <div class="bg-white p-4 rounded-xl shadow">
+    <p class="text-sm text-gray-500">Average P&L</p>
+    <p class="text-2xl font-bold text-blue-600">${{ avg_pnl }}</p>
+  </div>
+  <div class="bg-white p-4 rounded-xl shadow">
+    <p class="text-sm text-gray-500">Win Rate</p>
+    <p class="text-2xl font-bold text-yellow-600">{{ win_rate }}%</p>
+  </div>
+</div>
+
+<div class="bg-white p-6 rounded-xl shadow">
+  <h3 class="text-lg font-semibold mb-2">Equity Curve</h3>
+  <canvas id="equityChart" height="100"></canvas>
+</div>
+
+<canvas id="equityChart"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('equityChart').getContext('2d');
+
+const chart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: {{ dates_json|safe }},
+    datasets: [{
+      label: 'Profit/Loss',
+      data: {{ profits_json|safe }},
+      fill: false,
+      borderColor: 'rgb(75, 192, 192)',
+      tension: 0.1
+    }]
+  },
+});
+</script>
+
