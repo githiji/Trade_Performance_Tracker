@@ -1,19 +1,43 @@
-<html>
-    <head>
-        <title>add</title>
-    </head>
-    <body>
-        <P>this is where you will add your files</P>
-       
-        <form method="post" enctype="multipart/form-data">z
-             {% csrf_token %}
-            {{form}}
-        <button type="submit" name="add" value="add">submit</button>
-        </form>
+{% extends 'trading/base.html' %}
 
-        </html>
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+  <div class="bg-white shadow-lg rounded-2xl p-8 max-w-lg w-full">
+    <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">Upload Trade History</h2>
 
-        
-    </body>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="mb-4 text-sm text-white px-4 py-3 rounded {{ message.tags|default:'bg-blue-500' }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
 
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+      {% csrf_token %}
 
+      <!-- File input -->
+      <div>
+        <label class="block text-gray-700 font-medium mb-2">MT5 Trade History File</label>
+        {{ form.file.errors }}
+        {{ form.file }}
+      </div>
+
+      <!-- Notes input -->
+      <div>
+        <label class="block text-gray-700 font-medium mb-2">Notes (optional)</label>
+        {{ form.notes.errors }}
+        {{ form.notes }}
+      </div>
+
+      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-200">
+        Upload & Save
+      </button>
+    </form>
+
+    <div class="mt-6 text-center text-sm text-gray-500">
+      Need help? Make sure you're uploading the correct MT5 HTML file.
+    </div>
+  </div>
+</div>
+{% endblock %}

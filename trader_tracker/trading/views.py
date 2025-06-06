@@ -1,19 +1,19 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import Trade
 from .forms import TradeForm
 from .my_funcs import readfile
 from django.db.models import Sum, Avg
 import json
 from django.core.serializers.json import DjangoJSONEncoder
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
+@login_required(login_url='/login')
 def index(request):
     return render(request, 'trading/index.html')
-
-# i found out that the code below the breakpoint is not runnning
 # and when i check the value of form it retturns this 
 # <TradeForm bound=True, valid=Unknown, fields=(file;notes)>
-    
+@login_required(login_url='/login')
 def collect_trades(request):
    
     if request.method == "POST":
@@ -36,7 +36,7 @@ def collect_trades(request):
                     profit_loss=trade["profit"]
                 )
 
-            return render(request, 'trading/add.html', {"form":form})
+            return redirect('dash')
         else:
             return render(request, 'trading/add.html', {"form":form})
         
@@ -44,7 +44,7 @@ def collect_trades(request):
         form = TradeForm()
         return render(request, 'trading/add.html', {"form":form})
     
-
+@login_required(login_url='/login')
 def dashboard(request):
     trades = Trade.objects.filter(user=request.user).order_by('date')
     dates = [t.date.strftime('%Y-%m-%d') for t in trades]
