@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from .models import Trade
 from .forms import TradeForm
-from .my_funcs import readfile
+from .my_funcs import readfile, mt5_auto_collect
 from django.db.models import Sum, Avg
 import json
 from django.core.serializers.json import DjangoJSONEncoder
@@ -19,10 +19,14 @@ def collect_trades(request):
     if request.method == "POST":
         form = TradeForm(request.POST, request.FILES)
         if form.is_valid():
-            html_file = form.cleaned_data['file']
-            content = html_file.read().decode('utf-8')
-            trades = readfile(content)
-            notes = form.cleaned_data['notes']
+            if request.post.get('mt5')== 'collected':
+                trades = mt5_auto_collect()
+            else:
+                html_file = form.cleaned_data['file']
+                content = html_file.read().decode('utf-8')
+                trades = readfile(content)
+                notes = form.cleaned_data['notes']
+                
             for trade in trades:
                 Trade.objects.create(
                     user = request.user,
@@ -56,3 +60,5 @@ def dashboard(request):
         'profits_json': json.dumps(profits, cls=DjangoJSONEncoder),
     }
     return render(request, 'trading/dashbaord.html', context)
+
+
