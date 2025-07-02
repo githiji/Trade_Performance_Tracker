@@ -1,0 +1,95 @@
+{% extends "trading/base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="bg-white p-4 rounded-xl shadow mb-6">
+  <h3 class="text-lg font-semibold mb-2">Starting Balance</h3>
+  <form method="post">
+    {% csrf_token %}
+    {{ balance_form.starting_balance }}
+    <button type="submit" name="balance_submit"
+            class="mt-2 bg-green-600 text-white px-4 py-1 rounded-lg">
+      Save Balance
+    </button>
+  </form>
+</div>
+
+<form method="get" class="mb-6">
+  <label for="tag" class="mr-2 text-sm font-semibold">Filter by Tag:</label>
+  <select name="tag" onchange="this.form.submit()" class="border rounded px-2 py-1">
+    <option value="">All Tags</option>
+    {% for tag in tags %}
+      <option value="{{ tag.id }}" {% if selected_tag == tag.id %}selected{% endif %}>
+        {{ tag.name }}
+      </option>
+    {% endfor %}
+  </select>
+</form>
+
+<form method="get" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+  <input type="text" name="instrument" placeholder="Instrument" value="{{ request.GET.instrument }}" class="input" />
+  <select name="direction" class="input">
+    <option value="">Direction</option>
+    <option value="BUY" {% if request.GET.direction == 'BUY' %}selected{% endif %}>BUY</option>
+    <option value="SELL" {% if request.GET.direction == 'SELL' %}selected{% endif %}>SELL</option>
+  </select>
+  <input type="date" name="start_date" value="{{ request.GET.start_date }}" class="input" />
+  <input type="date" name="end_date" value="{{ request.GET.end_date }}" class="input" />
+  <select name="result" class="input">
+    <option value="">Result</option>
+    <option value="profit" {% if request.GET.result == 'profit' %}selected{% endif %}>Profit</option>
+    <option value="loss" {% if request.GET.result == 'loss' %}selected{% endif %}>Loss</option>
+  </select>
+  <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-xl col-span-2 md:col-span-1">Filter</button>
+</form>
+
+<h2 class="text-2xl font-semibold mb-4">Performance Dashboard</h2>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+  <div class="bg-white p-4 rounded-xl shadow">
+    <p class="text-sm text-gray-500">Total P&L</p>
+    <p class="text-2xl font-bold text-green-600">${{ total_pnl }}</p>
+  </div>
+  <div class="bg-white p-4 rounded-xl shadow">
+    <p class="text-sm text-gray-500">Average P&L</p>
+    <p class="text-2xl font-bold text-blue-600">${{ avg_pnl }}</p>
+  </div>
+  <div class="bg-white p-4 rounded-xl shadow">
+    <p class="text-sm text-gray-500">Win Rate</p>
+    <p class="text-2xl font-bold text-yellow-600">{{ win_rate }}%</p>
+  </div>
+</div>
+
+<div class="bg-white p-6 rounded-xl shadow">
+  <h3 class="text-lg font-semibold mb-2">Equity Curve</h3>
+  <canvas id="equityChart" height="100"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Safer JSON serialization -->
+{{ labels|json_script:"labels-data" }}
+{{ equity|json_script:"equity-data" }}
+
+<script>
+const labels = JSON.parse(document.getElementById('labels-data').textContent);
+const equity = JSON.parse(document.getElementById('equity-data').textContent);
+
+const ctx = document.getElementById('equityChart').getContext('2d');
+const chart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: labels,
+    datasets: [{
+      label: 'Equity Curve',
+      data: equity,
+      fill: false,
+      borderColor: 'rgb(75, 192, 192)',
+      tension: 0.3
+    }]
+  },
+});
+</script>
+
+{% endblock %}
