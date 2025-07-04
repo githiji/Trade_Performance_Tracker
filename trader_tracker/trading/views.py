@@ -113,6 +113,23 @@ def dashboard(request):
     total_pnl = trades.aggregate(Sum('profit_loss'))['profit_loss__sum'] or 0
     avg_pnl = trades.aggregate(Avg('profit_loss'))['profit_loss__avg'] or 0
     win_rate = round(100 * trades.filter(profit_loss__gt=0).count() / trades.count(), 2) if trades.exists() else 0
+    # ✅ Filter first, then slice
+    followed_qs = trades.filter(followed_strategy=True, strategy_outcome__in=['W', 'L']).order_by('-date')[:10]
+
+    # Then count manually
+    followed_wins = sum(1 for t in followed_qs if t.strategy_outcome == 'W')
+    followed_losses = sum(1 for t in followed_qs if t.strategy_outcome == 'L')
+
+
+    strategy_ratio = (
+        round((followed_wins / (followed_wins + followed_losses)) * 100, 2)
+        if (followed_wins + followed_losses) > 0 else 0
+    )
+
+    total_trades = trades.count()
+    followed_count = trades.filter(followed_strategy=True).count()
+    consistency_score = round((followed_count / total_trades) * 100, 2) if total_trades else 0
+    remaining_ratio = 100 - strategy_ratio
 
     context = {
         'trades': trades,
@@ -123,6 +140,14 @@ def dashboard(request):
         'win_rate': win_rate,
         'tags': Tag.objects.filter(user=request.user),
         'selected_tag': int(tag_id) if tag_id else None,
+        'strategy_ratio': strategy_ratio,
+        'consistency_score': consistency_score,
+        'strategy_ratio': strategy_ratio,
+        'remaining_ratio': remaining_ratio,
+        'consistency_score': consistency_score
     }
+    # Strategy Stats
+    
+
 
     return render(request, 'trading/dashbaord.html', context)

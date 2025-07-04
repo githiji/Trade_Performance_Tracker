@@ -39,6 +39,15 @@
      <label class="block text-sm font-medium mb-1">Tags (optional)</label>
     {{ form.tags }}
     </div>
+    <div class="mb-4">
+  <label class="block font-medium">Followed Strategy</label>
+  {{ form.followed_strategy }}
+</div>
+
+<div class="mb-4">
+  <label class="block font-medium">Outcome (if followed)</label>
+  {{ form.strategy_outcome }}
+</div>
     </form>
 
     <div class="mt-6 text-center text-sm text-gray-500">
@@ -46,4 +55,6 @@
     </div>
   </div>
 </div>
+
+
 {% endblock %}

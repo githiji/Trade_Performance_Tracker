@@ -2,6 +2,8 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
+
+<!-- Starting Balance -->
 <div class="bg-white p-4 rounded-xl shadow mb-6">
   <h3 class="text-lg font-semibold mb-2">Starting Balance</h3>
   <form method="post">
@@ -14,6 +16,7 @@
   </form>
 </div>
 
+<!-- Tag Filter -->
 <form method="get" class="mb-6">
   <label for="tag" class="mr-2 text-sm font-semibold">Filter by Tag:</label>
   <select name="tag" onchange="this.form.submit()" class="border rounded px-2 py-1">
@@ -26,6 +29,7 @@
   </select>
 </form>
 
+<!-- Filters -->
 <form method="get" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
   <input type="text" name="instrument" placeholder="Instrument" value="{{ request.GET.instrument }}" class="input" />
   <select name="direction" class="input">
@@ -43,7 +47,28 @@
   <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-xl col-span-2 md:col-span-1">Filter</button>
 </form>
 
-<h2 class="text-2xl font-semibold mb-4">Performance Dashboard</h2>
+<!-- Strategy Stats -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+  <div class="bg-white p-4 rounded-xl shadow">
+    <p class="text-sm text-gray-500">Strategy Win Ratio (Last 10 Followed Trades)</p>
+    <p class="text-2xl font-bold text-blue-600">{{ strategy_ratio }}%</p>
+  </div>
+  <div class="bg-white p-4 rounded-xl shadow">
+    <p class="text-sm text-gray-500">Strategy Consistency (Followed vs Total)</p>
+    <p class="text-2xl font-bold text-purple-600">{{ consistency_score }}%</p>
+  </div>
+</div>
+
+<!-- Gauge Chart -->
+<div class="bg-white p-6 rounded-xl shadow mt-6">
+  <h3 class="text-lg font-semibold mb-4">Strategy Discipline Gauge</h3>
+  <div class="w-full flex justify-center">
+    <canvas id="strategyGauge" width="200" height="100" style="max-width: 300px;"></canvas>
+  </div>
+</div>
+
+<!-- Dashboard Stats -->
+<h2 class="text-2xl font-semibold mt-10 mb-4">Performance Dashboard</h2>
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
   <div class="bg-white p-4 rounded-xl shadow">
@@ -60,15 +85,16 @@
   </div>
 </div>
 
+<!-- Equity Chart -->
 <div class="bg-white p-6 rounded-xl shadow">
   <h3 class="text-lg font-semibold mb-2">Equity Curve</h3>
   <canvas id="equityChart" height="100"></canvas>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Chart Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- Safer JSON serialization -->
+<!-- Safer JSON -->
 {{ labels|json_script:"labels-data" }}
 {{ equity|json_script:"equity-data" }}
 
@@ -89,6 +115,44 @@ const chart = new Chart(ctx, {
       tension: 0.3
     }]
   },
+});
+</script>
+
+<!-- Gauge -->
+<script>
+const ctxGauge = document.getElementById('strategyGauge').getContext('2d');
+const strategyRatio = {{ strategy_ratio|default:0 }};
+const remainingRatio = 100 - strategyRatio;
+
+let gaugeColor;
+if (strategyRatio >= 70) {
+  gaugeColor = '#4ade80'; // green
+} else if (strategyRatio >= 40) {
+  gaugeColor = '#facc15'; // yellow
+} else {
+  gaugeColor = '#f87171'; // red
+}
+
+new Chart(ctxGauge, {
+  type: 'doughnut',
+  data: {
+    labels: ['Win %', 'Remaining'],
+    datasets: [{
+      data: [strategyRatio, remainingRatio],
+      backgroundColor: [gaugeColor, '#e5e7eb'],
+      borderWidth: 0,
+      cutout: '75%'
+    }]
+  },
+  options: {
+    responsive: true,
+    rotation: -90,
+    circumference: 180,
+    plugins: {
+      legend: { display: false },
+      tooltip: { enabled: false },
+    }
+  }
 });
 </script>
 

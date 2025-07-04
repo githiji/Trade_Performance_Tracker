@@ -5,14 +5,14 @@ class TradeForm(forms.ModelForm):
     file = forms.FileField(required=False)
     class Meta:
         model = Trade
-        fields = ['file', 'notes', 'tags']  # Add 'tags' here
+        fields = ['file', 'notes', 'tags', 'followed_strategy', 'strategy_outcome']  # Add 'tags' here
         widgets = {
             'tags': forms.CheckboxSelectMultiple(),  # Or use SelectMultiple for dropdown
         }
 
 
 class StartingBalanceForm(forms.ModelForm):
-    starting_balance = forms.BooleanField(required=False)
+    starting_balance = forms.IntegerField(required=False)
     class Meta:
         model = UserProfile
         fields = ['starting_balance']
@@ -22,3 +22,6 @@ class StartingBalanceForm(forms.ModelForm):
                 'placeholder': 'Starting balance',
             })
         }
+
+    
+

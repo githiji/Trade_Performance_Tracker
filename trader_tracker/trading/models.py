@@ -11,7 +11,7 @@ class Tag(models.Model):
 
 class Trade(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    date = models.DateField(unique=True)
+    date = models.DateField()
     instrument = models.CharField(max_length=100,)
     direction = models.CharField(max_length=4, choices=[('BUY', 'Buy'), ('SELL', 'Sell')])
     entry_price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -20,6 +20,8 @@ class Trade(models.Model):
     profit_loss = models.DecimalField(max_digits=10, decimal_places=2)
     notes = models.TextField(blank=True)
     tags = models.ManyToManyField(Tag, blank=True)
+    followed_strategy = models.BooleanField(default=False)
+    strategy_outcome = models.CharField(max_length=1, choices=[('W', 'Win'), ('L', 'Loss')], blank=True, null=True)
 
 class  UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
