@@ -1,0 +1,38 @@
+{% extends "trading/base.html" %}
+{% block content %}
+<h2 class="text-xl font-bold mb-4">Trading Journal</h2>
+
+<form method="post" enctype="multipart/form-data" class="bg-white p-4 rounded-xl shadow mb-6">
+
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Save Entry</button>
+</form>
+
+<hr class="mb-4">
+
+<h3 class="text-lg font-semibold">Your Entries</h3>
+<ul>
+  {% for entry in entries %}
+    <li class="mb-4 border-b pb-2">
+      <strong>{{ entry.date }}</strong> 
+      {% if entry.trade %}(Trade: {{ entry.trade.instrument }}){% endif %}
+      <p>{{ entry.entry }}</p>
+      {% if entry.emotion %}<p><em>Emotion:</em> {{ entry.emotion }}</p>{% endif %}
+      {% if entry.chart_image %}
+    <img src="{{ entry.chart_image.url }}" alt="Chart Screenshot" class="mt-2 rounded border max-w-full" />
+     {% endif %}
+     {% if entry.auto_feedback %}
+        <div class="bg-gray-100 mt-3 p-3 rounded text-sm">
+            <strong>🧠 AI Feedback:</strong>
+            <p>{{ entry.auto_feedback|linebreaks }}</p>
+        </div>
+    {% endif %}
+
+
+    </li>
+  {% empty %}
+    <li>No journal entries yet.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

@@ -75,3 +75,23 @@ def mt5_auto_collect():
 
     mt5.shutdown()
     return collected
+
+
+def generate_ai_feedback(entry_text, emotion, session):
+    feedback = []
+
+    if emotion:
+        if emotion.lower() in ['anxious', 'fearful', 'uncertain']:
+            feedback.append("⚠️ You reported feeling anxious. Consider pausing when emotions run high.")
+        if emotion.lower() in ['confident', 'focused']:
+            feedback.append("✅ You felt confident — stick to your plan and don’t overtrade.")
+    
+    if session:
+        feedback.append(f"📍 Entry was during the {session.upper()} session.")
+
+    if "revenge" in entry_text.lower():
+        feedback.append("❗ Possible revenge trading behavior detected.")
+    if "missed" in entry_text.lower():
+        feedback.append("🕒 You might be hesitating. Try to build trust in your system.")
+
+    return "\n".join(feedback) if feedback else "🧠 No clear pattern detected yet."

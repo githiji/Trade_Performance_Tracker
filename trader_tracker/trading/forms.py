@@ -1,5 +1,6 @@
 from django import forms
-from .models import Tag, Trade,UserProfile
+from .models import Tag, Trade,UserProfile, JournalEntry
+   
 
 class TradeForm(forms.ModelForm):
     file = forms.FileField(required=False)
@@ -23,5 +24,12 @@ class StartingBalanceForm(forms.ModelForm):
             })
         }
 
-    
+class JournalEntryForm(forms.ModelForm):
+    class Meta:
+        model = JournalEntry
+        fields = ['trade', 'entry', 'emotion', 'session', 'chart_image']
+        widgets = {
+            'entry': forms.Textarea(attrs={'rows': 4}),
+            'emotion': forms.TextInput(attrs={'placeholder': 'e.g., confident, anxious'}),
+        }   
 

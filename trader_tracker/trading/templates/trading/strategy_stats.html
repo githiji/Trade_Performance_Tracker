@@ -1,0 +1,32 @@
+<!-- templates/trading/strategy_stats.html -->
+{% extends "trading/base.html" %}
+{% block title %}Strategy Stats{% endblock %}
+
+{% block content %}
+<h2 class="text-2xl font-bold mb-4">Strategy Performance</h2>
+
+<table class="w-full text-left border-collapse">
+  <thead>
+    <tr class="bg-gray-100 text-sm">
+      <th class="p-2">Strategy</th>
+      <th class="p-2">Wins</th>
+      <th class="p-2">Losses</th>
+      <th class="p-2">Total Trades</th>
+      <th class="p-2">Total P&L</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for strategy in strategies %}
+      <tr class="border-b">
+        <td class="p-2 font-medium">{{ strategy.strategy|default:"No Strategy" }}</td>
+        <td class="p-2 text-green-600">{{ strategy.wins }}</td>
+        <td class="p-2 text-red-600">{{ strategy.losses }}</td>
+        <td class="p-2">{{ strategy.total_trades }}</td>
+        <td class="p-2 {% if strategy.total_pnl >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+          ${{ strategy.total_pnl|floatformat:2 }}
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

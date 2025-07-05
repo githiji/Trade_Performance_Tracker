@@ -1,13 +1,14 @@
 from django.shortcuts import render, redirect
-from .models import Trade, Tag, UserProfile
-from .forms import TradeForm, StartingBalanceForm
-from .my_funcs import readfile, mt5_auto_collect
+from .models import Trade, Tag, UserProfile, JournalEntry
+from .forms import TradeForm, StartingBalanceForm, JournalEntryForm
+from .my_funcs import readfile, mt5_auto_collect, generate_ai_feedback
 from django.db.models import Sum, Avg
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.utils.dateparse import parse_date
+from django.db.models import Count, Sum, Q
 
 # Create your views here.
 
@@ -151,3 +152,38 @@ def dashboard(request):
 
 
     return render(request, 'trading/dashbaord.html', context)
+
+# views.py
+from django.db.models import Count, Sum, Q
+from django.shortcuts import render
+from .models import Trade
+
+def strategy_stats(request):
+    user_trades = Trade.objects.filter(user=request.user)
+
+    strategies = user_trades.values('strategy').annotate(
+        wins=Count('id', filter=Q(profit_loss__gt=0)),
+        losses=Count('id', filter=Q(profit_loss__lt=0)),
+        total_pnl=Sum('profit_loss'),
+        total_trades=Count('id')
+    )
+
+    return render(request, 'trading/strategy_stats.html', {
+        'strategies': strategies,
+    })
+
+@login_required
+def journal(request):
+    if request.method == 'POST':
+        form = JournalEntryForm(request.POST, request.FILES)
+        if form.is_valid():
+            entry = form.save(commit=False)
+            entry.user = request.user
+            entry.auto_feedback = generate_ai_feedback(entry.entry, entry.emotion, entry.session)
+            entry.save()
+            return redirect('journal')
+    else:
+        form = JournalEntryForm()
+
+    entries = JournalEntry.objects.filter(user=request.user).order_by('-date')
+    return render(request, 'trading/journal.html', {'form': form, 'entries': entries})
